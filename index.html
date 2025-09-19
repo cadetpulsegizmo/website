@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>People and Places Research</title>
   <style>
     body {
@@ -23,17 +24,51 @@
     a:hover {
       text-decoration: underline;
     }
+
+    /* Contact section tweaks */
+    .contact { max-width: 700px; margin: 40px auto; padding: 0 16px; }
+    .contact h2 { margin-bottom: 12px; }
+    .form-frame { width: 100%; height: 600px; border: none; }
+    @media (max-width: 480px) {
+      .form-frame { height: 700px; } /* extra height on small screens */
+    }
   </style>
 </head>
 <body>
   <img src="test.jpeg" alt="My Logo">
   <h1>People and Places Research</h1>
+
   <p>
     We are a small team of researchers who specialise in researching people's attitudes to the places they live in and new places they could move to.
   </p>
-  <p>
-    <a href="https://www.greatspeechwriting.co.uk/" target="_blank">Visit Another Site</a>
-    <a href="https://ppresearch.co.uk/privacy.pdf">Privacy Policy</a>
+
+  <!-- New line requested -->
+  <p class="note">
+    We are currently working with <strong>Great Communications</strong> on a project — please go
+    <a href="https://www.greatspeechwriting.co.uk/" target="_blank" rel="noopener">here</a>
+    for further information.
   </p>
+
+  <p>
+    <a href="https://www.greatspeechwriting.co.uk/" target="_blank" rel="noopener">Visit Another Site</a>
+    <a href="https://ppresearch.co.uk/privacy.pdf" target="_blank" rel="noopener">Privacy Policy</a>
+  </p>
+
+  <!-- Contact section with Microsoft Form -->
+  <section class="contact" id="contact">
+    <h2>Contact Us</h2>
+    <iframe
+      class="form-frame"
+      width="640px"
+      height="480px"
+      src="https://forms.office.com/Pages/ResponsePage.aspx?id=FRsemkCKoEmjempbe6K-7J1wdOO4k4ZHj3tFTMaUuX5UQjkyUDMwSFlEMEVZMUtTRTBWOEFWVVdOSi4u&embed=true"
+      frameborder="0"
+      marginwidth="0"
+      marginheight="0"
+      style="border: none; max-width:100%; max-height:100vh"
+      allowfullscreen webkitallowfullscreen mozallowfullscreen msallowfullscreen>
+    </iframe>
+    <p>If the form doesn’t load, <a href="https://forms.office.com/Pages/ResponsePage.aspx?id=FRsemkCKoEmjempbe6K-7J1wdOO4k4ZHj3tFTMaUuX5UQjkyUDMwSFlEMEVZMUtTRTBWOEFWVVdOSi4u" target="_blank" rel="noopener">open it here</a>.</p>
+  </section>
 </body>
 </html>
