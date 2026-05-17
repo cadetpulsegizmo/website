@@ -1,0 +1,809 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8" />
+<title>Design system — People &amp; Places Research</title>
+<meta name="description" content="Live visual catalogue of the PPR design system." />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="stylesheet" href="styles.css" />
+<style>
+  /* ── Catalogue-only chrome ─────────────────────────────────────
+     This page documents the system. Local styles here are for the
+     SHOWCASE FURNITURE (swatch grids, spec tables, etc.) — NOT for
+     anything that should be part of the system itself. */
+
+  /* Catalogue uses the long-form layout but a wider content column */
+  .long-form { max-width: 1240px; gap: 80px; }
+  .long-content { max-width: none; }
+
+  /* Section headings sit with an eyebrow above */
+  .ds-section { margin-top: 96px; }
+  .ds-section:first-of-type { margin-top: 0; }
+  .ds-section > .eyebrow { margin: 0 0 12px; }
+  .ds-section > h2 { margin-top: 0; }
+  .ds-section > .intro { font-size: 18px; line-height: 1.55; color: var(--slate); max-width: 64ch; margin: 0 0 40px; }
+
+  /* Spec block: a swatch / sample on the left, spec on the right */
+  .spec {
+    display: grid;
+    grid-template-columns: minmax(220px, 320px) 1fr;
+    gap: 32px;
+    padding: 28px 0;
+    border-top: 0.5px solid var(--stone);
+    align-items: start;
+  }
+  .spec:last-of-type { border-bottom: 0.5px solid var(--stone); }
+  .spec .preview { display: flex; align-items: flex-start; }
+  .spec .desc h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 6px;
+    letter-spacing: 0;
+  }
+  .spec .desc p {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--slate);
+    margin: 0 0 10px;
+    max-width: 60ch;
+  }
+  .spec .desc dl {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 4px 14px;
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+  }
+  .spec .desc dt { color: var(--slate); }
+  .spec .desc dd { margin: 0; }
+
+  /* Swatch */
+  .swatch {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border: 0.5px solid rgba(14, 17, 22, 0.08);
+    display: flex;
+    align-items: flex-end;
+    padding: 12px;
+  }
+  .swatch.ink   { background: var(--ink); color: var(--paper); }
+  .swatch.paper { background: var(--paper); color: var(--ink); }
+  .swatch.burgundy { background: var(--burgundy); color: var(--paper); }
+  .swatch.slate { background: var(--slate); color: var(--paper); }
+  .swatch.stone { background: var(--stone); color: var(--ink); }
+  .swatch .label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  /* Type scale samples — render at actual size */
+  .type-sample {
+    font-family: var(--font-serif);
+    color: var(--ink);
+  }
+
+  /* Live component panel — shows the component, framed */
+  .demo {
+    border: 0.5px solid var(--stone);
+    background: var(--paper);
+    padding: 32px;
+    position: relative;
+    overflow: visible;
+  }
+  .demo + .demo { margin-top: 32px; }
+  .demo .demo-label {
+    position: absolute;
+    top: -8px;
+    left: 14px;
+    background: var(--paper);
+    padding: 0 8px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+
+  /* Code-ish caption */
+  code, .mono-inline {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--stone);
+    padding: 1px 6px;
+    border-radius: 0;
+    color: var(--ink);
+  }
+
+  /* Motion demo */
+  .ease-trace {
+    width: 100%;
+    height: 120px;
+    overflow: visible;
+  }
+
+  /* Rules list — two columns */
+  .rules {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    margin: 0 0 32px;
+  }
+  .rules .col h3 {
+    font-size: 14px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    margin: 0 0 16px;
+    font-weight: 400;
+  }
+  .rules .col.do h3   { color: var(--burgundy); }
+  .rules .col.dont h3 { color: var(--slate); }
+  .rules .col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .rules .col li {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink);
+    margin: 0 0 14px;
+    padding-left: 18px;
+    position: relative;
+  }
+  .rules .col.do li::before,
+  .rules .col.dont li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0.55em;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 2px solid var(--burgundy);
+  }
+  .rules .col.dont li::before {
+    border: none;
+    background: var(--slate);
+    width: 9px;
+    height: 2px;
+    border-radius: 0;
+    top: 0.8em;
+  }
+
+  /* Responsive tweaks */
+  @media (max-width: 900px) {
+    .spec {
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+    .rules { grid-template-columns: 1fr; gap: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site reveal">
+  <a class="brand" href="index.html" aria-label="People &amp; Places Research">
+    <svg class="brand-emblem" viewBox="0 0 215.65 224.02" aria-hidden="true">
+      <polygon class="ch" points="215.87 127.23 154.93 127.65 143.41 127.72 131.07 106.67 125.01 96.34 112.66 75.28 118.63 64.77 148.46 12.29 175.85 27.86 136.98 96.26 136.81 96.26 136.89 96.41 136.98 96.26 215.65 95.72 215.87 127.23" />
+      <polygon class="ch" points="175.09 200.17 147.92 216.11 108.12 148.25 108.21 148.08 108.01 148.08 108.12 148.25 69.24 216.65 41.84 201.08 71.97 148.08 77.65 138.09 102.05 137.92 114.03 137.84 138.44 137.67 144.54 148.08 175.09 200.17" />
+      <polygon class="ch" points="102.71 75.28 90.65 96.51 84.73 106.91 72.67 128.14 60.58 128.22 .21 128.63 0 97.12 78.67 96.58 78.76 96.73 78.84 96.58 78.67 96.58 38.87 28.72 66.06 12.78 96.88 65.34 102.71 75.28" />
+      <path class="hd" d="M106.53,0c-9.34,0-16.9,7.57-16.9,16.91,0,9.34,7.57,16.9,16.91,16.9,9.34,0,16.9-7.57,16.9-16.91C123.44,7.56,115.86,0,106.53,0ZM106.54,24.86h0c-4.38,0-7.95-3.57-7.95-7.95,0-2.12.83-4.12,2.33-5.62,1.5-1.5,3.5-2.33,5.62-2.33,4.39,0,7.95,3.57,7.96,7.95,0,4.38-3.56,7.95-7.95,7.96Z" />
+      <path class="hd" d="M203.01,59.14c-4.67-8.08-15.01-10.85-23.09-6.18-8.08,4.67-10.85,15.01-6.18,23.09,4.67,8.08,15.01,10.85,23.09,6.18,8.08-4.67,10.85-15.01,6.18-23.09ZM196.05,69.66c-.55,2.05-1.86,3.77-3.7,4.83-1.23.71-2.56,1.07-3.96,1.07-2.84,0-5.48-1.52-6.9-3.98-2.19-3.8-.89-8.67,2.91-10.87,1.23-.71,2.56-1.07,3.96-1.07,2.84,0,5.48,1.52,6.9,3.98,1.06,1.84,1.35,3.98.8,6.03Z" />
+      <path class="hd" d="M198.56,143.59c-8.09-4.67-18.42-1.89-23.09,6.2-4.67,8.09-1.89,18.42,6.2,23.09,8.09,4.67,18.42,1.89,23.09-6.2,4.67-8.09,1.89-18.42-6.2-23.09ZM197.01,162.21c-1.42,2.46-4.06,3.98-6.9,3.98-1.4,0-2.73-.36-3.96-1.07-3.8-2.19-5.11-7.06-2.91-10.86,1.42-2.46,4.06-3.98,6.9-3.98,1.4,0,2.73.36,3.96,1.07,3.8,2.19,5.11,7.06,2.92,10.86Z" />
+      <path class="hd" d="M107.95,190.21c-9.34,0-16.9,7.57-16.9,16.91,0,9.34,7.57,16.9,16.91,16.9,9.34,0,16.9-7.57,16.9-16.91,0-9.34-7.57-16.9-16.91-16.9ZM113.58,212.74c-1.5,1.5-3.5,2.33-5.62,2.33h0c-4.38,0-7.95-3.57-7.95-7.95,0-2.12.83-4.12,2.33-5.62s3.5-2.33,5.62-2.33c4.39,0,7.95,3.57,7.96,7.95,0,2.12-.83,4.12-2.33,5.62Z" />
+      <path class="hd" d="M43.07,153.7c-4.67-8.08-15.01-10.85-23.09-6.18-8.08,4.67-10.85,15.01-6.18,23.09,4.67,8.08,15.01,10.85,23.09,6.18,8.08-4.67,10.85-15.01,6.18-23.09ZM32.42,169.04c-1.23.71-2.56,1.07-3.96,1.07-2.84,0-5.48-1.52-6.9-3.98-1.06-1.84-1.35-3.98-.8-6.03.55-2.05,1.86-3.77,3.7-4.83,1.23-.71,2.56-1.07,3.96-1.07,2.84,0,5.48,1.52,6.9,3.98,2.19,3.8.89,8.67-2.91,10.87Z" />
+      <path class="hd" d="M34.2,52.96c-8.09-4.67-18.42-1.89-23.09,6.2-4.67,8.09-1.89,18.42,6.2,23.09,8.09,4.67,18.42,1.89,23.09-6.2,4.67-8.09,1.89-18.42-6.2-23.09ZM32.64,71.58c-1.42,2.46-4.06,3.98-6.9,3.98-1.4,0-2.73-.36-3.96-1.07-1.84-1.06-3.16-2.78-3.71-4.83-.55-2.05-.27-4.2.79-6.04,1.42-2.46,4.06-3.98,6.9-3.98,1.4,0,2.73.36,3.96,1.07,3.8,2.19,5.11,7.06,2.91,10.86Z" />
+    </svg>
+    <span class="brand-text">
+      <span>People &amp; Places</span>
+      <span>Research</span>
+    </span>
+  </a>
+  <nav aria-label="Primary">
+    <a href="how-we-work.html">How we work</a>
+    <a href="take-part.html">Take part</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+</header>
+
+<main class="long-form">
+
+  <aside class="rail" aria-label="On this page">
+    <div class="rail-label">On this page</div>
+    <a href="#tokens" class="rail-item active" data-target="tokens">
+      <svg class="wedge" viewBox="0 0 30 22" aria-hidden="true"><path d="M 26 4 L 6 11 L 26 18" stroke="currentColor" stroke-linecap="square" stroke-linejoin="miter" fill="none" /></svg>
+      <span>Tokens</span>
+    </a>
+    <a href="#illustration" class="rail-item" data-target="illustration">
+      <svg class="wedge" viewBox="0 0 30 22" aria-hidden="true"><path d="M 26 4 L 6 11 L 26 18" stroke="currentColor" stroke-linecap="square" stroke-linejoin="miter" fill="none" /></svg>
+      <span>Illustration</span>
+    </a>
+    <a href="#components" class="rail-item" data-target="components">
+      <svg class="wedge" viewBox="0 0 30 22" aria-hidden="true"><path d="M 26 4 L 6 11 L 26 18" stroke="currentColor" stroke-linecap="square" stroke-linejoin="miter" fill="none" /></svg>
+      <span>Components</span>
+    </a>
+    <a href="#motion" class="rail-item" data-target="motion">
+      <svg class="wedge" viewBox="0 0 30 22" aria-hidden="true"><path d="M 26 4 L 6 11 L 26 18" stroke="currentColor" stroke-linecap="square" stroke-linejoin="miter" fill="none" /></svg>
+      <span>Motion</span>
+    </a>
+    <a href="#rules" class="rail-item" data-target="rules">
+      <svg class="wedge" viewBox="0 0 30 22" aria-hidden="true"><path d="M 26 4 L 6 11 L 26 18" stroke="currentColor" stroke-linecap="square" stroke-linejoin="miter" fill="none" /></svg>
+      <span>Rules</span>
+    </a>
+  </aside>
+
+  <div class="long-content">
+
+    <h1>Design system</h1>
+    <p class="lede">Extracted from the homepage and How we work prototypes. Five colours, one typeface, one motion easing, one illustration vocabulary derived from the emblem.</p>
+
+    <!-- ─── Tokens ─────────────────────────────────────────────── -->
+    <section id="tokens" data-section-id="tokens" class="ds-section">
+      <div class="eyebrow">§ 01</div>
+      <h2>Tokens</h2>
+      <p class="intro">The atomic decisions: colour, typography, layout, motion. Defined once as CSS custom properties in <code>styles.css</code>, used everywhere by name.</p>
+
+      <h3 style="margin: 32px 0 18px; font-size: 18px;">Colour</h3>
+
+      <div class="spec">
+        <div class="preview"><div class="swatch ink"><span class="label">Ink</span></div></div>
+        <div class="desc">
+          <h3>Ink</h3>
+          <p>Primary text, headlines. The only near-black on the site.</p>
+          <dl>
+            <dt>token</dt><dd>--ink</dd>
+            <dt>hex</dt><dd>#0E1116</dd>
+            <dt>uses</dt><dd>Body text, h1–h3, mass plates</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="preview"><div class="swatch paper"><span class="label">Paper</span></div></div>
+        <div class="desc">
+          <h3>Paper</h3>
+          <p>Page background, and reversed-out text on Burgundy plates.</p>
+          <dl>
+            <dt>token</dt><dd>--paper</dd>
+            <dt>hex</dt><dd>#FAF7F2</dd>
+            <dt>uses</dt><dd>Body background, button text</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="preview"><div class="swatch burgundy"><span class="label">Burgundy</span></div></div>
+        <div class="desc">
+          <h3>Burgundy</h3>
+          <p>Single accent. Used for links, the ring bullet, the wedge mark, pillar tags, button hover. Never as a fill for body text.</p>
+          <dl>
+            <dt>token</dt><dd>--burgundy</dd>
+            <dt>hex</dt><dd>#7B2D3A</dd>
+            <dt>uses</dt><dd>Links, accent illustrations, active state</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="preview"><div class="swatch slate"><span class="label">Slate</span></div></div>
+        <div class="desc">
+          <h3>Slate</h3>
+          <p>Secondary text — ledes, captions, monospace micro-labels, footer copy.</p>
+          <dl>
+            <dt>token</dt><dd>--slate</dd>
+            <dt>hex</dt><dd>#5C5C5C</dd>
+            <dt>uses</dt><dd>Lede, captions, eyebrows, footer</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="preview"><div class="swatch stone"><span class="label">Stone</span></div></div>
+        <div class="desc">
+          <h3>Stone</h3>
+          <p>Hairline dividers and surface tints. Only structural — never carries information.</p>
+          <dl>
+            <dt>token</dt><dd>--stone</dd>
+            <dt>hex</dt><dd>#E6E0D6</dd>
+            <dt>uses</dt><dd>Header bottom border, pillar boundaries, footer top border</dd>
+          </dl>
+        </div>
+      </div>
+
+      <h3 style="margin: 56px 0 18px; font-size: 18px;">Typography</h3>
+
+      <div class="spec">
+        <div class="preview"><div class="type-sample" style="font-size: 56px; line-height: 1.04; letter-spacing: -0.014em; max-width: 14ch;">We research how people feel about places.</div></div>
+        <div class="desc">
+          <h3>Display / hero h1</h3>
+          <p>Homepage hero. Largest type on the site. Always Georgia regular weight, never bold.</p>
+          <dl>
+            <dt>size</dt><dd>68px (desktop) / 40px (mobile)</dd>
+            <dt>line</dt><dd>1.04</dd>
+            <dt>tracking</dt><dd>-0.018em</dd>
+            <dt>wrap</dt><dd>balance, max 14ch</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="preview"><div class="type-sample" style="font-size: 32px; line-height: 1.2; letter-spacing: -0.005em;">Ethics and data</div></div>
+        <div class="desc">
+          <h3>Section h2</h3>
+          <p>In-page section heading. Used as the only sub-header inside long-form content.</p>
+          <dl>
+            <dt>size</dt><dd>32px / 26px mobile</dd>
+            <dt>line</dt><dd>1.2</dd>
+            <dt>weight</dt><dd>400</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="preview"><div class="type-sample" style="font-size: 22px; line-height: 1.25;">Ruthlessly accurate</div></div>
+        <div class="desc">
+          <h3>Pillar / sub-section h3</h3>
+          <p>Pillar tile titles, sub-section headings.</p>
+          <dl>
+            <dt>size</dt><dd>22px / 19px mobile</dd>
+            <dt>line</dt><dd>1.25</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="preview"><div class="type-sample" style="font-size: 21px; line-height: 1.5; color: var(--slate); font-style: italic; max-width: 24ch;">Every project is different, but our approach has a typical shape.</div></div>
+        <div class="desc">
+          <h3>Lede</h3>
+          <p>Italic Slate Georgia. Sets the tone for a long-form page.</p>
+          <dl>
+            <dt>class</dt><dd>.lede</dd>
+            <dt>size</dt><dd>21px / 18px mobile</dd>
+            <dt>colour</dt><dd>--slate, italic</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="preview"><div class="type-sample" style="font-size: 17px; line-height: 1.72; max-width: 36ch;">We work with the client to understand who the key audiences are, what decisions need to be made, and what would be most useful to know.</div></div>
+        <div class="desc">
+          <h3>Long-form body</h3>
+          <p>The reading paragraph for How we work, Privacy. Slightly more generous line-height than default body to hold attention on long content.</p>
+          <dl>
+            <dt>size</dt><dd>17px / 16px mobile</dd>
+            <dt>line</dt><dd>1.72</dd>
+            <dt>measure</dt><dd>--max-content (60ch)</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="preview"><div class="type-sample eyebrow" style="font-size: 11px;">PILLAR · § 01 · ON THIS PAGE</div></div>
+        <div class="desc">
+          <h3>Eyebrow / monospace label</h3>
+          <p>Utility label used for pillar tags, rail items, section call-numbers. The only place a non-Georgia typeface appears.</p>
+          <dl>
+            <dt>class</dt><dd>.eyebrow</dd>
+            <dt>font</dt><dd>--font-mono</dd>
+            <dt>size</dt><dd>10–11px</dd>
+            <dt>tracking</dt><dd>0.18em uppercase</dd>
+          </dl>
+        </div>
+      </div>
+
+      <h3 style="margin: 56px 0 18px; font-size: 18px;">Layout &amp; motion</h3>
+
+      <div class="spec">
+        <div class="preview">
+          <div style="display: grid; gap: 6px; width: 100%;">
+            <div style="background: var(--stone); height: 14px; max-width: 100%;"></div>
+            <div style="font-family: var(--font-mono); font-size: 10px; color: var(--slate);">--max-page · 1100px (home, contact, take-part)</div>
+            <div style="background: var(--stone); height: 14px; max-width: 94%;"></div>
+            <div style="font-family: var(--font-mono); font-size: 10px; color: var(--slate);">--max-long · 1040px (long-form pages)</div>
+            <div style="background: var(--burgundy); height: 14px; max-width: 70%; opacity: 0.6;"></div>
+            <div style="font-family: var(--font-mono); font-size: 10px; color: var(--slate);">--max-prose · 70ch (generic prose)</div>
+            <div style="background: var(--burgundy); height: 14px; max-width: 60%;"></div>
+            <div style="font-family: var(--font-mono); font-size: 10px; color: var(--slate);">--max-content · 60ch (long-form column)</div>
+          </div>
+        </div>
+        <div class="desc">
+          <h3>Layout tokens</h3>
+          <p>Body measure stays at 60–70 characters per line. Hero headlines run 14–16ch and use <code>text-wrap: balance</code>.</p>
+          <dl>
+            <dt>page</dt><dd>1100px</dd>
+            <dt>long-form</dt><dd>1040px</dd>
+            <dt>prose</dt><dd>70ch</dd>
+            <dt>content</dt><dd>60ch</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="preview">
+          <svg viewBox="0 0 280 90" width="100%" height="90">
+            <path d="M 4 84 C 60 84, 224 6, 276 6" stroke="var(--burgundy)" stroke-width="1.5" fill="none" />
+            <line x1="4" y1="6" x2="276" y2="6" stroke="var(--stone)" stroke-width="0.5" />
+            <line x1="4" y1="84" x2="276" y2="84" stroke="var(--stone)" stroke-width="0.5" />
+            <line x1="4" y1="6" x2="4" y2="84" stroke="var(--stone)" stroke-width="0.5" />
+            <line x1="276" y1="6" x2="276" y2="84" stroke="var(--stone)" stroke-width="0.5" />
+            <circle cx="4" cy="84" r="2.5" fill="var(--burgundy)" />
+            <circle cx="276" cy="6" r="2.5" fill="var(--burgundy)" />
+          </svg>
+        </div>
+        <div class="desc">
+          <h3>Motion tokens</h3>
+          <p>One easing curve for the whole site. Never bouncy, never <code>ease-in-out</code>. Durations sit in three tiers:</p>
+          <dl>
+            <dt>--ease-settle</dt><dd>cubic-bezier(0.2, 0.8, 0.2, 1)</dd>
+            <dt>--t-hover</dt><dd>200ms</dd>
+            <dt>--t-pop</dt><dd>260ms</dd>
+            <dt>--t-reveal</dt><dd>720ms</dd>
+          </dl>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ─── Illustration ───────────────────────────────────────── -->
+    <section id="illustration" data-section-id="illustration" class="ds-section">
+      <div class="eyebrow">§ 02</div>
+      <h2>Illustration</h2>
+      <p class="intro">All illustration derives from the logo emblem. Three primitives are in active use; four more are documented as available extensions.</p>
+
+      <div class="spec">
+        <div class="preview" style="display: flex; gap: 24px; align-items: center;">
+          <svg viewBox="0 0 215.65 224.02" width="32" height="32" style="color: var(--ink);">
+            <polygon style="fill: currentColor;" points="215.87 127.23 154.93 127.65 143.41 127.72 131.07 106.67 125.01 96.34 112.66 75.28 118.63 64.77 148.46 12.29 175.85 27.86 136.98 96.26 136.81 96.26 136.89 96.41 136.98 96.26 215.65 95.72 215.87 127.23" />
+            <polygon style="fill: currentColor;" points="175.09 200.17 147.92 216.11 108.12 148.25 108.21 148.08 108.01 148.08 108.12 148.25 69.24 216.65 41.84 201.08 71.97 148.08 77.65 138.09 102.05 137.92 114.03 137.84 138.44 137.67 144.54 148.08 175.09 200.17" />
+            <polygon style="fill: currentColor;" points="102.71 75.28 90.65 96.51 84.73 106.91 72.67 128.14 60.58 128.22 .21 128.63 0 97.12 78.67 96.58 78.76 96.73 78.84 96.58 78.67 96.58 38.87 28.72 66.06 12.78 96.88 65.34 102.71 75.28" />
+            <path style="fill: currentColor;" d="M106.53,0c-9.34,0-16.9,7.57-16.9,16.91,0,9.34,7.57,16.9,16.91,16.9,9.34,0,16.9-7.57,16.9-16.91C123.44,7.56,115.86,0,106.53,0ZM106.54,24.86h0c-4.38,0-7.95-3.57-7.95-7.95,0-2.12.83-4.12,2.33-5.62,1.5-1.5,3.5-2.33,5.62-2.33,4.39,0,7.95,3.57,7.96,7.95,0,4.38-3.56,7.95-7.95,7.96Z" />
+            <path style="fill: currentColor;" d="M203.01,59.14c-4.67-8.08-15.01-10.85-23.09-6.18-8.08,4.67-10.85,15.01-6.18,23.09,4.67,8.08,15.01,10.85,23.09,6.18,8.08-4.67,10.85-15.01,6.18-23.09ZM196.05,69.66c-.55,2.05-1.86,3.77-3.7,4.83-1.23.71-2.56,1.07-3.96,1.07-2.84,0-5.48-1.52-6.9-3.98-2.19-3.8-.89-8.67,2.91-10.87,1.23-.71,2.56-1.07,3.96-1.07,2.84,0,5.48,1.52,6.9,3.98,1.06,1.84,1.35,3.98.8,6.03Z" />
+            <path style="fill: currentColor;" d="M198.56,143.59c-8.09-4.67-18.42-1.89-23.09,6.2-4.67,8.09-1.89,18.42,6.2,23.09,8.09,4.67,18.42,1.89,23.09-6.2,4.67-8.09,1.89-18.42-6.2-23.09ZM197.01,162.21c-1.42,2.46-4.06,3.98-6.9,3.98-1.4,0-2.73-.36-3.96-1.07-3.8-2.19-5.11-7.06-2.91-10.86,1.42-2.46,4.06-3.98,6.9-3.98,1.4,0,2.73.36,3.96,1.07,3.8,2.19,5.11,7.06,2.92,10.86Z" />
+            <path style="fill: currentColor;" d="M107.95,190.21c-9.34,0-16.9,7.57-16.9,16.91,0,9.34,7.57,16.9,16.91,16.9,9.34,0,16.9-7.57,16.9-16.91,0-9.34-7.57-16.9-16.91-16.9ZM113.58,212.74c-1.5,1.5-3.5,2.33-5.62,2.33h0c-4.38,0-7.95-3.57-7.95-7.95,0-2.12.83-4.12,2.33-5.62s3.5-2.33,5.62-2.33c4.39,0,7.95,3.57,7.96,7.95,0,2.12-.83,4.12-2.33,5.62Z" />
+            <path style="fill: currentColor;" d="M43.07,153.7c-4.67-8.08-15.01-10.85-23.09-6.18-8.08,4.67-10.85,15.01-6.18,23.09,4.67,8.08,15.01,10.85,23.09,6.18,8.08-4.67,10.85-15.01,6.18-23.09ZM32.42,169.04c-1.23.71-2.56,1.07-3.96,1.07-2.84,0-5.48-1.52-6.9-3.98-1.06-1.84-1.35-3.98-.8-6.03.55-2.05,1.86-3.77,3.7-4.83,1.23-.71,2.56-1.07,3.96-1.07,2.84,0,5.48,1.52,6.9,3.98,2.19,3.8.89,8.67-2.91,10.87Z" />
+            <path style="fill: currentColor;" d="M34.2,52.96c-8.09-4.67-18.42-1.89-23.09,6.2-4.67,8.09-1.89,18.42,6.2,23.09,8.09,4.67,18.42,1.89,23.09-6.2,4.67-8.09,1.89-18.42-6.2-23.09ZM32.64,71.58c-1.42,2.46-4.06,3.98-6.9,3.98-1.4,0-2.73-.36-3.96-1.07-1.84-1.06-3.16-2.78-3.71-4.83-.55-2.05-.27-4.2.79-6.04,1.42-2.46,4.06-3.98,6.9-3.98,1.4,0,2.73.36,3.96,1.07,3.8,2.19,5.11,7.06,2.91,10.86Z" />
+          </svg>
+          <svg viewBox="0 0 215.65 224.02" width="64" height="64" style="color: var(--ink);">
+            <polygon style="fill: currentColor;" points="215.87 127.23 154.93 127.65 143.41 127.72 131.07 106.67 125.01 96.34 112.66 75.28 118.63 64.77 148.46 12.29 175.85 27.86 136.98 96.26 136.81 96.26 136.89 96.41 136.98 96.26 215.65 95.72 215.87 127.23" />
+            <polygon style="fill: currentColor;" points="175.09 200.17 147.92 216.11 108.12 148.25 108.21 148.08 108.01 148.08 108.12 148.25 69.24 216.65 41.84 201.08 71.97 148.08 77.65 138.09 102.05 137.92 114.03 137.84 138.44 137.67 144.54 148.08 175.09 200.17" />
+            <polygon style="fill: currentColor;" points="102.71 75.28 90.65 96.51 84.73 106.91 72.67 128.14 60.58 128.22 .21 128.63 0 97.12 78.67 96.58 78.76 96.73 78.84 96.58 78.67 96.58 38.87 28.72 66.06 12.78 96.88 65.34 102.71 75.28" />
+            <path style="fill: currentColor;" d="M106.53,0c-9.34,0-16.9,7.57-16.9,16.91,0,9.34,7.57,16.9,16.91,16.9,9.34,0,16.9-7.57,16.9-16.91C123.44,7.56,115.86,0,106.53,0ZM106.54,24.86h0c-4.38,0-7.95-3.57-7.95-7.95,0-2.12.83-4.12,2.33-5.62,1.5-1.5,3.5-2.33,5.62-2.33,4.39,0,7.95,3.57,7.96,7.95,0,4.38-3.56,7.95-7.95,7.96Z" />
+            <path style="fill: currentColor;" d="M203.01,59.14c-4.67-8.08-15.01-10.85-23.09-6.18-8.08,4.67-10.85,15.01-6.18,23.09,4.67,8.08,15.01,10.85,23.09,6.18,8.08-4.67,10.85-15.01,6.18-23.09ZM196.05,69.66c-.55,2.05-1.86,3.77-3.7,4.83-1.23.71-2.56,1.07-3.96,1.07-2.84,0-5.48-1.52-6.9-3.98-2.19-3.8-.89-8.67,2.91-10.87,1.23-.71,2.56-1.07,3.96-1.07,2.84,0,5.48,1.52,6.9,3.98,1.06,1.84,1.35,3.98.8,6.03Z" />
+            <path style="fill: currentColor;" d="M198.56,143.59c-8.09-4.67-18.42-1.89-23.09,6.2-4.67,8.09-1.89,18.42,6.2,23.09,8.09,4.67,18.42,1.89,23.09-6.2,4.67-8.09,1.89-18.42-6.2-23.09ZM197.01,162.21c-1.42,2.46-4.06,3.98-6.9,3.98-1.4,0-2.73-.36-3.96-1.07-3.8-2.19-5.11-7.06-2.91-10.86,1.42-2.46,4.06-3.98,6.9-3.98,1.4,0,2.73.36,3.96,1.07,3.8,2.19,5.11,7.06,2.92,10.86Z" />
+            <path style="fill: currentColor;" d="M107.95,190.21c-9.34,0-16.9,7.57-16.9,16.91,0,9.34,7.57,16.9,16.91,16.9,9.34,0,16.9-7.57,16.9-16.91,0-9.34-7.57-16.9-16.91-16.9ZM113.58,212.74c-1.5,1.5-3.5,2.33-5.62,2.33h0c-4.38,0-7.95-3.57-7.95-7.95,0-2.12.83-4.12,2.33-5.62s3.5-2.33,5.62-2.33c4.39,0,7.95,3.57,7.96,7.95,0,2.12-.83,4.12-2.33,5.62Z" />
+            <path style="fill: currentColor;" d="M43.07,153.7c-4.67-8.08-15.01-10.85-23.09-6.18-8.08,4.67-10.85,15.01-6.18,23.09,4.67,8.08,15.01,10.85,23.09,6.18,8.08-4.67,10.85-15.01,6.18-23.09ZM32.42,169.04c-1.23.71-2.56,1.07-3.96,1.07-2.84,0-5.48-1.52-6.9-3.98-1.06-1.84-1.35-3.98-.8-6.03.55-2.05,1.86-3.77,3.7-4.83,1.23-.71,2.56-1.07,3.96-1.07,2.84,0,5.48,1.52,6.9,3.98,2.19,3.8.89,8.67-2.91,10.87Z" />
+            <path style="fill: currentColor;" d="M34.2,52.96c-8.09-4.67-18.42-1.89-23.09,6.2-4.67,8.09-1.89,18.42,6.2,23.09,8.09,4.67,18.42,1.89,23.09-6.2,4.67-8.09,1.89-18.42-6.2-23.09ZM32.64,71.58c-1.42,2.46-4.06,3.98-6.9,3.98-1.4,0-2.73-.36-3.96-1.07-1.84-1.06-3.16-2.78-3.71-4.83-.55-2.05-.27-4.2.79-6.04,1.42-2.46,4.06-3.98,6.9-3.98,1.4,0,2.73.36,3.96,1.07,3.8,2.19,5.11,7.06,2.91,10.86Z" />
+          </svg>
+          <svg viewBox="0 0 215.65 224.02" width="120" height="120" style="color: var(--burgundy); opacity: 0.13;">
+            <polygon style="fill: currentColor;" points="215.87 127.23 154.93 127.65 143.41 127.72 131.07 106.67 125.01 96.34 112.66 75.28 118.63 64.77 148.46 12.29 175.85 27.86 136.98 96.26 136.81 96.26 136.89 96.41 136.98 96.26 215.65 95.72 215.87 127.23" />
+            <polygon style="fill: currentColor;" points="175.09 200.17 147.92 216.11 108.12 148.25 108.21 148.08 108.01 148.08 108.12 148.25 69.24 216.65 41.84 201.08 71.97 148.08 77.65 138.09 102.05 137.92 114.03 137.84 138.44 137.67 144.54 148.08 175.09 200.17" />
+            <polygon style="fill: currentColor;" points="102.71 75.28 90.65 96.51 84.73 106.91 72.67 128.14 60.58 128.22 .21 128.63 0 97.12 78.67 96.58 78.76 96.73 78.84 96.58 78.67 96.58 38.87 28.72 66.06 12.78 96.88 65.34 102.71 75.28" />
+            <path style="fill: currentColor;" d="M106.53,0c-9.34,0-16.9,7.57-16.9,16.91,0,9.34,7.57,16.9,16.91,16.9,9.34,0,16.9-7.57,16.9-16.91C123.44,7.56,115.86,0,106.53,0ZM106.54,24.86h0c-4.38,0-7.95-3.57-7.95-7.95,0-2.12.83-4.12,2.33-5.62,1.5-1.5,3.5-2.33,5.62-2.33,4.39,0,7.95,3.57,7.96,7.95,0,4.38-3.56,7.95-7.95,7.96Z" />
+            <path style="fill: currentColor;" d="M203.01,59.14c-4.67-8.08-15.01-10.85-23.09-6.18-8.08,4.67-10.85,15.01-6.18,23.09,4.67,8.08,15.01,10.85,23.09,6.18,8.08-4.67,10.85-15.01,6.18-23.09ZM196.05,69.66c-.55,2.05-1.86,3.77-3.7,4.83-1.23.71-2.56,1.07-3.96,1.07-2.84,0-5.48-1.52-6.9-3.98-2.19-3.8-.89-8.67,2.91-10.87,1.23-.71,2.56-1.07,3.96-1.07,2.84,0,5.48,1.52,6.9,3.98,1.06,1.84,1.35,3.98.8,6.03Z" />
+            <path style="fill: currentColor;" d="M198.56,143.59c-8.09-4.67-18.42-1.89-23.09,6.2-4.67,8.09-1.89,18.42,6.2,23.09,8.09,4.67,18.42,1.89,23.09-6.2,4.67-8.09,1.89-18.42-6.2-23.09ZM197.01,162.21c-1.42,2.46-4.06,3.98-6.9,3.98-1.4,0-2.73-.36-3.96-1.07-3.8-2.19-5.11-7.06-2.91-10.86,1.42-2.46,4.06-3.98,6.9-3.98,1.4,0,2.73.36,3.96,1.07,3.8,2.19,5.11,7.06,2.92,10.86Z" />
+            <path style="fill: currentColor;" d="M107.95,190.21c-9.34,0-16.9,7.57-16.9,16.91,0,9.34,7.57,16.9,16.91,16.9,9.34,0,16.9-7.57,16.9-16.91,0-9.34-7.57-16.9-16.91-16.9ZM113.58,212.74c-1.5,1.5-3.5,2.33-5.62,2.33h0c-4.38,0-7.95-3.57-7.95-7.95,0-2.12.83-4.12,2.33-5.62s3.5-2.33,5.62-2.33c4.39,0,7.95,3.57,7.96,7.95,0,2.12-.83,4.12-2.33,5.62Z" />
+            <path style="fill: currentColor;" d="M43.07,153.7c-4.67-8.08-15.01-10.85-23.09-6.18-8.08,4.67-10.85,15.01-6.18,23.09,4.67,8.08,15.01,10.85,23.09,6.18,8.08-4.67,10.85-15.01,6.18-23.09ZM32.42,169.04c-1.23.71-2.56,1.07-3.96,1.07-2.84,0-5.48-1.52-6.9-3.98-1.06-1.84-1.35-3.98-.8-6.03.55-2.05,1.86-3.77,3.7-4.83,1.23-.71,2.56-1.07,3.96-1.07,2.84,0,5.48,1.52,6.9,3.98,2.19,3.8.89,8.67-2.91,10.87Z" />
+            <path style="fill: currentColor;" d="M34.2,52.96c-8.09-4.67-18.42-1.89-23.09,6.2-4.67,8.09-1.89,18.42,6.2,23.09,8.09,4.67,18.42,1.89,23.09-6.2,4.67-8.09,1.89-18.42-6.2-23.09ZM32.64,71.58c-1.42,2.46-4.06,3.98-6.9,3.98-1.4,0-2.73-.36-3.96-1.07-1.84-1.06-3.16-2.78-3.71-4.83-.55-2.05-.27-4.2.79-6.04,1.42-2.46,4.06-3.98,6.9-3.98,1.4,0,2.73.36,3.96,1.07,3.8,2.19,5.11,7.06,2.91,10.86Z" />
+          </svg>
+        </div>
+        <div class="desc">
+          <h3>Emblem</h3>
+          <p>The six-figure mark. Three deployed scales: header lockup (44px, Ink), section-mark (~32px, Burgundy at 50% — reserved), hero watermark (540px, Burgundy at <code>opacity: 0.13</code>).</p>
+          <dl>
+            <dt>source</dt><dd>logos/ppr-emblem.svg</dd>
+            <dt>classes</dt><dd>.brand-emblem, .emblem-watermark, .emblem-svg</dd>
+            <dt>colours</dt><dd>Ink (header), Burgundy (watermark, section mark)</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="preview" style="display: flex; gap: 32px; align-items: center;">
+          <svg class="wedge" viewBox="0 0 30 22" style="width: 14px; height: 10px;" aria-hidden="true">
+            <path d="M 26 4 L 6 11 L 26 18" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter" fill="none" />
+          </svg>
+          <svg class="wedge" viewBox="0 0 30 22" style="width: 18px; height: 13px;" aria-hidden="true">
+            <path d="M 26 4 L 6 11 L 26 18" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter" fill="none" />
+          </svg>
+          <svg class="wedge" viewBox="0 0 30 22" style="width: 28px; height: 20px;" aria-hidden="true">
+            <path d="M 26 4 L 6 11 L 26 18" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter" fill="none" />
+          </svg>
+        </div>
+        <div class="desc">
+          <h3>Wedge</h3>
+          <p>One chevron arm from the emblem, used as a wayfinding marker — never as a section divider. Found beside <code>PILLAR I</code> tags, in rail items, and as <code>›</code> link pointers.</p>
+          <dl>
+            <dt>class</dt><dd>.wedge</dd>
+            <dt>sizes</dt><dd>14×10 (pillars), 18×13 (rail)</dd>
+            <dt>stroke</dt><dd>4 default → 5 hover → 6 active</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="preview">
+          <ul class="ring-list" style="margin: 0;">
+            <li>
+              <svg class="ring-bullet" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7" /></svg>
+              <span>One. The bullet centre aligns with the text x-height middle.</span>
+            </li>
+            <li>
+              <svg class="ring-bullet" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7" /></svg>
+              <span>Two. Hollow ring derived from the emblem head proportions.</span>
+            </li>
+          </ul>
+        </div>
+        <div class="desc">
+          <h3>Ring bullet</h3>
+          <p>Hollow Burgundy ring with wall thickness matching the logo head (~47% of outer radius). Used <em>only</em> as a list bullet — never as a decorative dot.</p>
+          <dl>
+            <dt>class</dt><dd>.ring-bullet, .ring-list</dd>
+            <dt>size</dt><dd>12×12px</dd>
+            <dt>alignment</dt><dd>translateY(2px) — sits at text x-height middle</dd>
+          </dl>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ─── Components ─────────────────────────────────────────── -->
+    <section id="components" data-section-id="components" class="ds-section">
+      <div class="eyebrow">§ 03</div>
+      <h2>Components</h2>
+      <p class="intro">Composable blocks built from the primitives. Each one is rendered live below, using <code>styles.css</code> as deployed.</p>
+
+      <div class="demo">
+        <span class="demo-label">Pillar tile</span>
+        <article class="pillar" style="max-width: 280px;">
+          <div class="pillar-mark">
+            <svg class="wedge" viewBox="0 0 30 22" aria-hidden="true">
+              <path d="M 26 4 L 6 11 L 26 18" stroke="currentColor" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter" fill="none" />
+            </svg>
+            <span>Pillar I</span>
+          </div>
+          <h3>Ruthlessly accurate</h3>
+          <p>We are committed to the truth. Our job is to find out what people actually think and tell you accurately — even when it&rsquo;s uncomfortable.</p>
+        </article>
+        <p style="font-size: 13px; color: var(--slate); margin-top: 18px; max-width: 60ch;">Hover the tile to see the wedge nudge 2px right and its stroke thicken.</p>
+      </div>
+
+      <div class="demo">
+        <span class="demo-label">Take-part pointer</span>
+        <p class="take-part-pointer" style="margin: 0;">
+          Have you been invited to take part in a study?
+          <a class="pointer-link" href="#">
+            <span>See here</span>
+            <span class="pointer-arrow" aria-hidden="true">&nbsp;&rsaquo;</span>
+          </a>
+        </p>
+        <p style="font-size: 13px; color: var(--slate); margin-top: 18px; max-width: 60ch;">Hover the link to see the arrow translate 3px right and the underline thicken to 2px.</p>
+      </div>
+
+      <div class="demo">
+        <span class="demo-label">Ring-bulleted list</span>
+        <ul class="ring-list">
+          <li>
+            <svg class="ring-bullet" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7" /></svg>
+            <span>We work with the client to understand who the key audiences are.</span>
+          </li>
+          <li>
+            <svg class="ring-bullet" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7" /></svg>
+            <span>We then use a range of digital tools and datasets to identify and recruit participants.</span>
+          </li>
+          <li>
+            <svg class="ring-bullet" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7" /></svg>
+            <span>We listen carefully to what they tell us.</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="demo">
+        <span class="demo-label">Form group</span>
+        <div class="form-group">
+          <label for="ds-name">Name</label>
+          <input id="ds-name" type="text" placeholder="" />
+        </div>
+        <div class="form-group">
+          <label for="ds-msg">Message</label>
+          <textarea id="ds-msg" placeholder=""></textarea>
+        </div>
+        <button class="submit" type="button">Send message</button>
+        <p style="font-size: 13px; color: var(--slate); margin-top: 18px; max-width: 60ch;">Square corners. Focus state uses inset Burgundy outline. Submit hovers from Ink to Burgundy.</p>
+      </div>
+
+      <div class="demo">
+        <span class="demo-label">Body link</span>
+        <p style="margin: 0;">Recordings are deleted one month after we report. The full account is in our <a href="#">privacy policy</a>. We say what we do, what we don&rsquo;t, what we can promise, and what we can&rsquo;t.</p>
+      </div>
+
+    </section>
+
+    <!-- ─── Motion ─────────────────────────────────────────────── -->
+    <section id="motion" data-section-id="motion" class="ds-section">
+      <div class="eyebrow">§ 04</div>
+      <h2>Motion</h2>
+      <p class="intro">One easing curve, three duration tiers. Every animated thing on the site fits inside this small grammar.</p>
+
+      <div class="spec">
+        <div class="preview">
+          <button id="replay-reveal" type="button" style="font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; background: var(--paper); border: 0.5px solid var(--slate); color: var(--ink); padding: 8px 14px; cursor: pointer; transition: all 200ms ease-out;">Replay reveal</button>
+        </div>
+        <div class="desc">
+          <h3>Page entrance reveal</h3>
+          <p>Every element with <code>.reveal</code> animates from <code>opacity: 0</code> + <code>translateY(14px)</code> to settled, over 720ms. Per-element stagger via <code>--delay</code>.</p>
+          <dl>
+            <dt>keyframe</dt><dd>ppr-settle</dd>
+            <dt>duration</dt><dd>--t-reveal (720ms)</dd>
+            <dt>easing</dt><dd>--ease-settle</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div id="reveal-replay-target" style="border-top: 0.5px solid var(--stone); padding-top: 24px; margin-top: 0;">
+        <h3 class="rev-demo" style="margin: 0 0 12px;">Title that settles in.</h3>
+        <p class="rev-demo" style="margin: 0 0 12px; color: var(--slate);">A supporting line follows it.</p>
+        <p class="rev-demo" style="margin: 0;">Then the body paragraph arrives last. Each item delays by 80ms after the one above.</p>
+      </div>
+
+      <div class="spec" style="margin-top: 48px;">
+        <div class="preview">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+            <div style="text-align: center;">
+              <div style="font-family: var(--font-mono); font-size: 11px; color: var(--burgundy); letter-spacing: 0.16em;">200ms</div>
+              <div style="font-family: var(--font-mono); font-size: 9px; color: var(--slate); margin-top: 4px; letter-spacing: 0.12em;">--t-hover</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-family: var(--font-mono); font-size: 11px; color: var(--burgundy); letter-spacing: 0.16em;">260ms</div>
+              <div style="font-family: var(--font-mono); font-size: 9px; color: var(--slate); margin-top: 4px; letter-spacing: 0.12em;">--t-pop</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-family: var(--font-mono); font-size: 11px; color: var(--burgundy); letter-spacing: 0.16em;">720ms</div>
+              <div style="font-family: var(--font-mono); font-size: 9px; color: var(--slate); margin-top: 4px; letter-spacing: 0.12em;">--t-reveal</div>
+            </div>
+          </div>
+        </div>
+        <div class="desc">
+          <h3>Three duration tiers</h3>
+          <p>If a new motion needs a different duration, it should fit one of these three. If it doesn&rsquo;t, the motion is probably wrong.</p>
+          <dl>
+            <dt>200ms</dt><dd>Hover transitions</dd>
+            <dt>260ms</dt><dd>Emblem element fade</dd>
+            <dt>720ms</dt><dd>Page reveals</dd>
+          </dl>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ─── Rules ──────────────────────────────────────────────── -->
+    <section id="rules" data-section-id="rules" class="ds-section">
+      <div class="eyebrow">§ 05</div>
+      <h2>Rules</h2>
+      <p class="intro">Editorial discipline, codified. Re-read these before introducing a new component or motif.</p>
+
+      <div class="rules">
+        <div class="col do">
+          <h3>Do</h3>
+          <ul>
+            <li>Use one of the five palette tokens. Never a free hex.</li>
+            <li>Set everything in Georgia. Reach for the monospace eyebrow only for utility labels.</li>
+            <li>Derive new motifs from the emblem (head ring, chevron arm) before inventing new shapes.</li>
+            <li>Use one motion easing — <code>--ease-settle</code>.</li>
+            <li>Keep body measure 60–70 characters per line.</li>
+            <li>Use <code>aria-current="page"</code> on the active nav link.</li>
+            <li>Mark all decorative SVG with <code>aria-hidden="true"</code>.</li>
+            <li>Use the logo (small) or whitespace for section transitions.</li>
+          </ul>
+        </div>
+        <div class="col dont">
+          <h3>Don&rsquo;t</h3>
+          <ul>
+            <li>Use the chevron / wedge as a section divider.</li>
+            <li>Add a second typeface, even &ldquo;just for headlines&rdquo;.</li>
+            <li>Round any corner — every input, plate, and frame is square.</li>
+            <li>Use a drop shadow.</li>
+            <li>Introduce a gradient.</li>
+            <li>Make motion bouncy or use <code>ease-in-out</code>.</li>
+            <li>Use Burgundy as a fill behind dark body text.</li>
+            <li>Add a new colour, even &ldquo;subtly&rdquo;. Use opacity on existing colours instead.</li>
+          </ul>
+        </div>
+      </div>
+
+      <p style="font-size: 14px; color: var(--slate); font-style: italic; max-width: 60ch;">For the full prose specification, including layout templates and accessibility rules, see <a href="design-system.md">design-system.md</a>.</p>
+
+    </section>
+
+  </div>
+
+</main>
+
+<footer class="site reveal" style="--delay: 200ms">
+  <span class="copy">&copy; People &amp; Places Research</span>
+  <nav aria-label="Footer">
+    <a href="privacy.html">Privacy</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── Rail scroll-spy ──
+  var items = document.querySelectorAll('.rail-item');
+  var sections = document.querySelectorAll('[data-section-id]');
+  function setActive(id) {
+    items.forEach(function (item) {
+      item.classList.toggle('active', item.dataset.target === id);
+    });
+  }
+  if ('IntersectionObserver' in window) {
+    var visible = new Set();
+    var sectionList = Array.prototype.slice.call(sections);
+    function pickTopmost() {
+      var topmost = null;
+      var topY = Infinity;
+      visible.forEach(function (el) {
+        var t = el.getBoundingClientRect().top;
+        if (t < topY) { topY = t; topmost = el; }
+      });
+      if (topmost) setActive(topmost.dataset.sectionId);
+      else setActive(sectionList[0].dataset.sectionId);
+    }
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) visible.add(e.target);
+        else visible.delete(e.target);
+      });
+      pickTopmost();
+    }, { rootMargin: '-15% 0px -65% 0px', threshold: 0 });
+    sectionList.forEach(function (s) { observer.observe(s); });
+  }
+
+  items.forEach(function (item) {
+    item.addEventListener('click', function (e) {
+      e.preventDefault();
+      var href = item.getAttribute('href');
+      if (!href || href.charAt(0) !== '#') return;
+      var target = document.getElementById(href.slice(1));
+      if (!target) return;
+      var top = target.getBoundingClientRect().top + window.scrollY - 24;
+      var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: top, behavior: reduced ? 'auto' : 'smooth' });
+    });
+  });
+
+  // ── Replay reveal demo ──
+  var replayBtn = document.getElementById('replay-reveal');
+  var revDemos = document.querySelectorAll('.rev-demo');
+  if (replayBtn && revDemos.length) {
+    var delays = [0, 80, 200];
+    function replay() {
+      revDemos.forEach(function (el, i) {
+        el.style.animation = 'none';
+        // force reflow
+        // eslint-disable-next-line no-unused-expressions
+        el.offsetHeight;
+        el.style.animation = '';
+        el.style.setProperty('--delay', delays[i] + 'ms');
+        el.classList.remove('reveal');
+        // eslint-disable-next-line no-unused-expressions
+        el.offsetHeight;
+        el.classList.add('reveal');
+      });
+    }
+    replayBtn.addEventListener('click', replay);
+    replay(); // play once on load
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8" />
+<title>PPR — Direction Exploration</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  /* PPR palette — locked */
+  :root {
+    --ink: #0E1116;
+    --paper: #FAF7F2;
+    --burgundy: #7B2D3A;
+    --slate: #5C5C5C;
+    --stone: #E6E0D6;
+  }
+
+  /* Anything *inside* a .ppr scope uses Georgia + brand palette. The canvas
+     chrome (labels, sections) keeps its own sans-serif. */
+  .ppr {
+    font-family: Georgia, "Times New Roman", Times, serif;
+    color: var(--ink);
+    background: var(--paper);
+    -webkit-font-smoothing: antialiased;
+  }
+  .ppr h1, .ppr h2, .ppr h3, .ppr p { margin: 0; }
+  .ppr a { color: var(--burgundy); text-decoration: none; border-bottom: 1px solid var(--burgundy); padding-bottom: 1px; }
+
+  /* Direction header within an artboard */
+  .dir-label {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+  .dir-name { font-size: 32px; line-height: 1.1; margin: 8px 0 14px; letter-spacing: -0.01em; }
+  .dir-thesis { font-size: 16px; line-height: 1.55; color: var(--slate); max-width: 56ch; }
+
+  /* "Section card" framing within each artboard — quiet hairlines, not boxes */
+  .zone {
+    border-top: 0.5px solid var(--stone);
+    padding-top: 14px;
+    margin-top: 36px;
+    position: relative;
+  }
+  .zone > .zone-label {
+    position: absolute;
+    top: -8px;
+    left: 0;
+    background: var(--paper);
+    padding-right: 10px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+
+  /* Hero mock */
+  .hero-mock {
+    position: relative;
+    padding: 28px 0 32px;
+    min-height: 280px;
+  }
+  .hero-mock h1.hero-h {
+    font-size: 44px;
+    line-height: 1.06;
+    font-weight: 400;
+    letter-spacing: -0.014em;
+    max-width: 14ch;
+    position: relative;
+    z-index: 2;
+  }
+  .hero-mock .hero-sub {
+    margin-top: 18px;
+    font-size: 15px;
+    color: var(--slate);
+    max-width: 50ch;
+    line-height: 1.55;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Pillar tile row mock */
+  .pillars-mock {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    padding: 22px 0 6px;
+  }
+  .pillar-mock { display: flex; flex-direction: column; gap: 12px; }
+  .pillar-mock .glyph {
+    height: 56px;
+    display: flex;
+    align-items: center;
+  }
+  .pillar-mock h3 { font-size: 14px; font-weight: 700; }
+  .pillar-mock p   { font-size: 13px; line-height: 1.5; color: var(--slate); }
+
+  /* Divider mock */
+  .divider-mock {
+    padding: 26px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+  }
+
+  /* Notes column at bottom */
+  .notes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    padding-top: 14px;
+  }
+  .notes h4 {
+    margin: 0 0 8px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--slate);
+    font-weight: 400;
+  }
+  .notes ul { margin: 0; padding-left: 18px; }
+  .notes li { font-size: 13px; line-height: 1.55; color: var(--ink); margin-bottom: 6px; }
+  .notes li em { color: var(--slate); font-style: italic; }
+
+  /* Annotation pill (used inline next to mocks) */
+  .pin {
+    display: inline-block;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--burgundy);
+    background: transparent;
+    border: 0.5px solid var(--burgundy);
+    padding: 3px 7px 2px;
+    border-radius: 999px;
+    vertical-align: middle;
+  }
+
+  /* Direction-A watermark emblem */
+  .emblem-watermark {
+    position: absolute;
+    right: -8px;
+    top: 8px;
+    width: 320px;
+    height: 320px;
+    opacity: 0.18;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Direction-B rings */
+  .rings-mock {
+    position: absolute;
+    right: -40px;
+    top: -10px;
+    width: 380px;
+    height: 380px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Direction-C marginalia */
+  .folio {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    color: var(--slate);
+    letter-spacing: 0.18em;
+  }
+  .folio-end {
+    text-align: center;
+    color: var(--burgundy);
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  /* Header bar above canvas — just a quiet intro */
+  .intro {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 30;
+    background: rgba(250, 247, 242, 0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 0.5px solid var(--stone);
+    padding: 14px 24px;
+    font-family: Georgia, serif;
+    color: var(--ink);
+    display: flex;
+    gap: 18px;
+    align-items: baseline;
+  }
+  .intro .label {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+  .intro .title { font-size: 15px; }
+  .intro .hint { margin-left: auto; font-size: 12px; color: var(--slate); }
+
+  /* ── Sub-system shared bits ───────────────────────── */
+  .hero-peek {
+    position: relative;
+    padding: 18px 0 22px;
+    border-bottom: 0.5px solid var(--stone);
+    margin-bottom: 8px;
+  }
+  .hero-peek .emblem-wm {
+    position: absolute; right: -10px; top: 0;
+    width: 160px; height: 160px; opacity: 0.10;
+    pointer-events: none;
+  }
+  .hero-peek h1 {
+    font-size: 32px; line-height: 1.08; font-weight: 400;
+    letter-spacing: -0.012em; max-width: 14ch;
+    margin: 0 0 8px; position: relative; z-index: 2;
+  }
+  .hero-peek .sub {
+    font-size: 13px; line-height: 1.55; color: var(--slate);
+    max-width: 50ch; margin: 0; position: relative; z-index: 2;
+  }
+  .hero-peek .peek-tag {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--burgundy); margin-bottom: 8px;
+  }
+
+  /* Body block under pillars — shows section heading + body grammar */
+  .body-zone .grammar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items: start;
+    padding: 4px 0 4px;
+  }
+
+  /* Pillar tile minor reset for new options */
+  .pillar-mock h3.t { font-size: 14px; font-weight: 700; margin: 4px 0 6px; }
+  .pillar-mock p.t  { font-size: 13px; line-height: 1.5; color: var(--slate); margin: 0; }
+
+  /* Option 1 — Hairlines */
+  .opt-hl .pillar-hl {
+    padding: 14px 0 0;
+    border-top: 0.5px solid var(--burgundy);
+    position: relative;
+  }
+  .opt-hl .pillar-hl::before {
+    content: ""; position: absolute; top: -0.5px; left: 0;
+    width: 12px; height: 12px;
+    border-left: 0.5px solid var(--burgundy);
+  }
+  .opt-hl .pillar-hl .num {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10px; letter-spacing: 0.18em; color: var(--burgundy);
+    margin-bottom: 10px;
+  }
+  .opt-hl .pq {
+    border-left: 2px solid var(--burgundy);
+    padding: 4px 0 4px 18px;
+    font-style: italic; font-size: 16px; line-height: 1.5;
+  }
+  .opt-hl .pq cite { display: block; font-style: normal; font-size: 11px; color: var(--slate); margin-top: 8px; letter-spacing: 0.04em; }
+  .opt-hl .sec-h {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 12px;
+  }
+  .opt-hl .sec-h::before {
+    content: ""; display: inline-block; width: 10px; height: 10px;
+    border-top: 0.5px solid var(--burgundy);
+    border-left: 0.5px solid var(--burgundy);
+    transform: translateY(2px);
+  }
+  .opt-hl .sec-h h4 {
+    font-size: 18px; margin: 0; font-weight: 400;
+  }
+  .opt-hl .sec-h .after { flex: 1; height: 0.5px; background: var(--stone); margin-left: 4px; }
+
+  /* Option 2 — Numerals */
+  .opt-nu .pillar-nu { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: start; }
+  .opt-nu .pillar-nu .fig {
+    font-family: Georgia, serif;
+    font-variant-numeric: oldstyle-nums;
+    font-size: 56px;
+    line-height: 0.9;
+    color: var(--burgundy);
+    letter-spacing: -0.01em;
+    margin-top: -6px;
+  }
+  .opt-nu .sec-h h4 {
+    font-size: 22px; margin: 0 0 14px; font-weight: 400;
+  }
+  .opt-nu .sec-h h4 .sec { color: var(--burgundy); font-style: italic; }
+  .opt-nu .pq {
+    display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: baseline;
+  }
+  .opt-nu .pq .big {
+    font-family: Georgia, serif;
+    font-variant-numeric: oldstyle-nums;
+    font-size: 64px; line-height: 0.9;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .opt-nu .pq .lbl { font-size: 13px; color: var(--slate); line-height: 1.45; }
+  .opt-nu .pq .lbl strong { color: var(--ink); font-weight: 400; font-size: 14px; }
+
+  /* Option 3 — Indexed */
+  .opt-ix .pillar-ix .tag {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10px; letter-spacing: 0.16em; color: var(--burgundy);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .opt-ix .pillar-ix .tag .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--burgundy); }
+  .opt-ix .sec-h {
+    display: flex; align-items: baseline; gap: 12px;
+    border-bottom: 0.5px solid var(--stone);
+    padding-bottom: 8px; margin-bottom: 14px;
+  }
+  .opt-ix .sec-h h4 { font-size: 18px; margin: 0; font-weight: 400; flex: 1; }
+  .opt-ix .sec-h .ref {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10px; letter-spacing: 0.16em; color: var(--slate);
+  }
+  .opt-ix .pq {
+    position: relative;
+    padding: 6px 0 6px 0;
+    font-size: 15px; line-height: 1.5;
+    font-style: italic;
+  }
+  .opt-ix .pq .ref-tag {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 9px; letter-spacing: 0.18em; color: var(--burgundy);
+    display: block; margin-bottom: 6px; font-style: normal;
+  }
+  .opt-ix .pq cite {
+    font-style: normal; font-size: 11px; color: var(--slate);
+    display: block; margin-top: 6px; letter-spacing: 0.04em;
+  }
+  .opt-ix .toc {
+    font-size: 13px; line-height: 1.9; color: var(--ink);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0 8px;
+    max-width: 320px;
+  }
+  .opt-ix .toc .lbl { display: flex; align-items: baseline; }
+  .opt-ix .toc .lbl::after {
+    content: ""; flex: 1; margin: 0 6px 4px;
+    border-bottom: 1px dotted var(--stone);
+    min-width: 10px;
+  }
+  .opt-ix .toc .pg {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px; color: var(--slate);
+  }
+
+  /* Option 4 — Diagrammatic */
+  .opt-dg .pillar-dg { position: relative; padding-top: 8px; }
+  .opt-dg .pillar-dg .diag {
+    height: 46px; position: relative; margin-bottom: 8px;
+  }
+  .opt-dg .leader {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10px; letter-spacing: 0.14em; color: var(--burgundy);
+  }
+  .opt-dg .sec-h h4 { font-size: 20px; margin: 0 0 12px; font-weight: 400; }
+  .opt-dg .pq {
+    position: relative;
+    padding-left: 60px;
+  }
+  .opt-dg .pq svg.leader-svg {
+    position: absolute; left: 0; top: 6px;
+    width: 50px; height: 36px;
+  }
+  .opt-dg .pq .label {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 9px; letter-spacing: 0.18em; color: var(--burgundy);
+    margin-bottom: 4px;
+  }
+  .opt-dg .pq blockquote {
+    margin: 0;
+    font-size: 15px; line-height: 1.5;
+    font-style: italic;
+  }
+  .opt-dg .body-text {
+    font-size: 13px; line-height: 1.55; color: var(--slate);
+  }
+  .opt-dg .body-text mark {
+    background: transparent;
+    color: var(--ink);
+    border-bottom: 0.5px solid var(--burgundy);
+  }
+
+  /* ── Variations on 01 — Hairlines + logo-derived illustration ─── */
+  /* Shared: keep the hairline-bracket pillar framing from 01 */
+  .var-pillar {
+    padding: 14px 0 0;
+    border-top: 0.5px solid var(--burgundy);
+    position: relative;
+  }
+  .var-pillar::before {
+    content: ""; position: absolute; top: -0.5px; left: 0;
+    width: 12px; height: 12px;
+    border-left: 0.5px solid var(--burgundy);
+  }
+  .var-pillar .num {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 10px; letter-spacing: 0.18em; color: var(--burgundy);
+    margin-bottom: 12px;
+  }
+  .var-pillar .glyph-row { margin: 4px 0 12px; }
+
+  .var-sec-h {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 12px;
+  }
+  .var-sec-h h4 { font-size: 18px; margin: 0; font-weight: 400; }
+  .var-sec-h .after { flex: 1; height: 0.5px; background: var(--stone); margin-left: 4px; }
+
+  .var-body { font-size: 13px; line-height: 1.6; color: var(--ink); margin: 0; }
+
+  /* List with custom markers */
+  .chev-list { list-style: none; padding: 0; margin: 0 0 14px; }
+  .chev-list li {
+    display: grid;
+    grid-template-columns: 14px 1fr;
+    gap: 10px;
+    align-items: baseline;
+    font-size: 13px; line-height: 1.5;
+    margin-bottom: 8px;
+    color: var(--ink);
+  }
+  .chev-list li .marker {
+    color: var(--burgundy);
+    transform: translateY(2px);
+  }
+
+  /* Take-part pointer */
+  .takepart {
+    margin-top: 18px;
+    font-size: 13px; color: var(--slate);
+    display: inline-flex; align-items: baseline; gap: 10px;
+  }
+  .takepart a {
+    color: var(--burgundy);
+    border-bottom: 0.5px solid var(--burgundy);
+    padding-bottom: 1px;
+  }
+
+  /* Pull-quote with figure to the left */
+  .quote-fig {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    align-items: start;
+    padding: 8px 0;
+  }
+  .quote-fig .body {
+    font-style: italic;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .quote-fig cite {
+    display: block;
+    margin-top: 8px;
+    font-style: normal;
+    font-size: 11px;
+    color: var(--slate);
+    letter-spacing: 0.04em;
+  }
+
+  /* Section divider for 01d — fan centred between rules */
+  .fan-divider {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 14px 0;
+  }
+  .fan-divider .rule { flex: 1; height: 0.5px; background: var(--stone); }
+
+  /* ── Standalone extracts (Step 1c) ─────────────────────────── */
+  /* Each section gets its own grammar — no hairlines+brackets shared base. */
+
+  /* E1 · Conversation marks */
+  .e1-pillar {
+    padding: 4px 0;
+    position: relative;
+  }
+  .e1-pillar .tag {
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--burgundy);
+    margin-bottom: 10px;
+  }
+  .e1-quote {
+    position: relative;
+    padding: 28px 24px 32px 36px;
+    background: rgba(123, 45, 58, 0.04);
+  }
+  .e1-quote .q-open { position: absolute; left: -2px; top: -10px; }
+  .e1-quote .q-close { position: absolute; right: -2px; bottom: -16px; }
+  .e1-quote .body { font-style: italic; font-size: 17px; line-height: 1.45; color: var(--ink); margin: 0; }
+  .e1-quote cite { display: block; margin-top: 12px; font-style: normal; font-size: 11px; color: var(--slate); letter-spacing: 0.04em; }
+
+  /* E2 · Mass plates */
+  .e2-pillar-mass {
+    background: var(--burgundy);
+    color: var(--paper);
+    padding: 22px 22px 24px;
+  }
+  .e2-pillar-mass h3 { color: var(--paper); }
+  .e2-pillar-mass p { color: rgba(250, 247, 242, 0.85); }
+  .e2-pillar-frame {
+    border: 1px solid var(--burgundy);
+    padding: 22px 22px 24px;
+  }
+  .e2-pillar-frame h3 { color: var(--burgundy); }
+  .e2-pillar .lbl {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 9px; letter-spacing: 0.2em;
+    margin-bottom: 14px;
+  }
+  .e2-pillar-mass .lbl { color: rgba(250, 247, 242, 0.7); }
+  .e2-pillar-frame .lbl { color: var(--burgundy); }
+  .e2-pillar h3.t { font-size: 16px; font-weight: 700; margin: 0 0 10px; }
+  .e2-pillar p.t  { font-size: 13px; line-height: 1.55; margin: 0; }
+  .e2-plate-callout {
+    background: var(--burgundy);
+    color: var(--paper);
+    padding: 18px 22px;
+    display: flex;
+    gap: 18px;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .e2-frame-quote {
+    border: 1px solid var(--burgundy);
+    padding: 18px 22px;
+    font-style: italic;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .e2-frame-quote cite { display: block; font-style: normal; font-size: 11px; color: var(--slate); margin-top: 10px; letter-spacing: 0.04em; }
+
+  /* E3 · Wedge margin */
+  .e3-layout {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  .e3-rail {
+    display: flex; flex-direction: column;
+    gap: 8px;
+    padding-top: 8px;
+  }
+  .e3-rail .step {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 8px;
+    align-items: center;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    color: var(--slate);
+    text-transform: uppercase;
+  }
+  .e3-rail .step.active { color: var(--burgundy); }
+  .e3-content h4 { font-size: 22px; margin: 0 0 12px; font-weight: 400; }
+  .e3-content p { font-size: 14px; line-height: 1.6; color: var(--ink); margin: 0 0 12px; }
+  .e3-content p.lede { color: var(--slate); }
+
+  /* E4 · Count strips */
+  .e4-pillar { padding: 4px 0; }
+  .e4-pillar .strip { margin-bottom: 14px; }
+  .e4-pillar h3 { font-size: 16px; font-weight: 700; margin: 0 0 8px; }
+  .e4-pillar p { font-size: 13px; line-height: 1.55; margin: 0; color: var(--ink); }
+  .e4-stat { display: grid; grid-template-columns: 1fr; gap: 18px; }
+  .e4-stat .row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    align-items: baseline;
+    padding-bottom: 14px;
+    border-bottom: 0.5px solid var(--stone);
+  }
+  .e4-stat .row:last-child { border-bottom: 0; }
+  .e4-stat .row .num {
+    font-family: Georgia, serif;
+    font-variant-numeric: oldstyle-nums;
+    font-size: 28px;
+    color: var(--burgundy);
+    line-height: 1;
+  }
+  .e4-stat .row .lbl {
+    font-size: 13px; line-height: 1.45; color: var(--slate);
+  }
+  .e4-stat .row .lbl strong { color: var(--ink); font-weight: 400; font-size: 14px; display: block; margin-bottom: 2px; }
+  .e4-section-h {
+    display: flex; align-items: baseline; gap: 16px; margin-bottom: 14px;
+  }
+  .e4-section-h h4 { font-size: 20px; margin: 0; font-weight: 400; }
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <span class="label">PPR · Step 1</span>
+  <span class="title">Direction exploration — three postures for motion &amp; illustration</span>
+  <span class="hint">Drag to pan · scroll to zoom · double-click a card to focus</span>
+</div>
+
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="../design-canvas.jsx"></script>
+<script type="text/babel" src="emblem.jsx"></script>
+<script type="text/babel" src="subsystems.jsx"></script>
+<script type="text/babel" src="variations.jsx"></script>
+<script type="text/babel" src="extracts.jsx"></script>
+<script type="text/babel" src="directions.jsx"></script>
+
+</body>
+</html>
