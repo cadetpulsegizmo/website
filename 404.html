@@ -7,20 +7,55 @@
 <meta name="robots" content="noindex, nofollow" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <link rel="stylesheet" href="/styles.css" />
+<script src="/book/booking-links.js"></script>
 <script>
-  // Case-insensitive routing: if the URL contains any uppercase letters
-  // (e.g. /SC/ or /Privacy/), redirect to the all-lowercase equivalent
-  // before rendering the 404 page. If the lowercase URL also doesn't
-  // exist, the user will land back here with an all-lowercase path and
-  // see the 404 content below — no redirect loop.
+  // Routing logic runs before the 404 page renders.
+  //
+  //   1. /book/<code>   → look up <code> in booking-links.js and redirect
+  //                       to the mapped MS Bookings URL, preserving any
+  //                       query string (e.g. ?participantId=674).
+  //                       If <code> not found → show "expired link" message.
+  //
+  //   2. Any URL with uppercase letters (e.g. /SC/, /Privacy/)
+  //                     → redirect to the all-lowercase equivalent.
+  //
+  //   3. Otherwise      → show the generic "page not found" message.
+  //
+  // No redirect loops — once at all-lowercase, no further redirect fires.
   (function () {
     var path = window.location.pathname;
+
+    // Rule 1 — booking vanity URL
+    var bookMatch = path.match(/^\/book\/([^/]+)\/?$/i);
+    if (bookMatch) {
+      var code = bookMatch[1].toLowerCase();
+      var links = window.BOOKING_LINKS || {};
+      if (links[code]) {
+        window.location.replace(links[code] + window.location.search + window.location.hash);
+        return;
+      }
+      // Code not in config — mark the page so the "expired" message shows
+      document.documentElement.setAttribute('data-error', 'booking-not-found');
+      return;
+    }
+
+    // Rule 2 — case-insensitive redirect for uppercase paths
     var lower = path.toLowerCase();
     if (path !== lower) {
       window.location.replace(lower + window.location.search + window.location.hash);
+      return;
     }
+
+    // Rule 3 — mark the page for the generic 404 message
+    document.documentElement.setAttribute('data-error', 'not-found');
   })();
 </script>
+<style>
+  /* Two possible messages — show the right one based on the routing result */
+  .msg-not-found, .msg-booking-not-found { display: none; }
+  html[data-error="not-found"] .msg-not-found { display: block; }
+  html[data-error="booking-not-found"] .msg-booking-not-found { display: block; }
+</style>
 </head>
 <body>
 
@@ -50,8 +85,15 @@
 </header>
 
 <main class="page">
-  <h1>Page not found</h1>
-  <p>The page you&rsquo;re looking for doesn&rsquo;t exist. Try the <a href="/">home page</a>, or get in touch via <a href="/contact/">contact</a>.</p>
+  <div class="msg-not-found">
+    <h1>Page not found</h1>
+    <p>The page you&rsquo;re looking for doesn&rsquo;t exist. Try the <a href="/">home page</a>, or get in touch via <a href="/contact/">contact</a>.</p>
+  </div>
+
+  <div class="msg-booking-not-found">
+    <h1>Booking link not found</h1>
+    <p>This booking link may have expired, or the study may no longer be running. Please email <a href="mailto:info@ppresearch.co.uk">info@ppresearch.co.uk</a> and we&rsquo;ll help.</p>
+  </div>
 </main>
 
 <footer class="site reveal" style="--delay: 200ms">
